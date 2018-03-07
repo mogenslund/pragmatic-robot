@@ -6,4 +6,4 @@
   (assert-eq 1 (+ 0 1) "Not working"))
 
 (deftest not-so-good
-  (assert-eq 1 (+ 1 1) "Not working"))
+  (assert-eq 1 (+ 1 0) "Not working"))
