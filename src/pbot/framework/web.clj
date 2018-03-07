@@ -155,6 +155,10 @@
       (.build)
       (.perform))))
 
+(defn switch-iframe
+  [id]
+  (.frame (.switchTo (web)) id))
+
 (defn assert-eq
   "Throws an Exception if the two first
   arguments are not equal. In that case
