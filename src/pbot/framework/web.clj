@@ -91,14 +91,22 @@
 (defn get-safe
   "Tries up to retries times to
   get the xpath. If no succes
-  nil is returned."
+  nil is returned.
+  If the xpath is already an
+  element, it is returned."
   [xpath]
-  (loop [i 0 e nil]
-    (if (and (< i @retries) (not e))
-      (do
-        (sleep (if (= i 0) 0 1000))
-        (recur (inc i) (get-element xpath)))
-      e))) ;; If i>=10 or e not nil
+  (if (string? xpath)
+    (loop [i 0 e nil]
+      (if (and (< i @retries) (not e))
+        (do
+          (sleep (if (= i 0) 0 1000))
+          (recur (inc i) (get-element xpath)))
+        (if e ;; If i>=10 or e not nil
+          e
+          (do
+            (println (str "\n\nElement: \"" xpath "\" not found!\n\n"))
+            false))))
+    xpath))
 
 
 (defn click
@@ -106,32 +114,26 @@
   If the element is a string it will be
   considered an xpath."
   [element]
-  (let [elem (if (string? element) (get-safe element) element)]
-    (when (not elem)
-      (quit-all)
-      (throw (Exception. (str "\n\nElement: \"" element "\" not found!\n\n"))))
-    (.click elem)))
+  (if-let [elem (get-safe element)]
+    (.click elem)
+    false))
 
 (defn send-keys
   "Takes a WebElement and a string to type into element.
   If the element is a string it will be considered an
   xpath."
   [element keys]
-  (let [elem (if (string? element) (get-safe element) element)]
-    (when (not elem)
-      (quit-all)
-      (throw (Exception. (str "\n\nElement: \"" element "\" not found!\n\n"))))
-    (.sendKeys elem (into-array [keys]))))
+  (if-let [elem (get-safe element)]
+    (.sendKeys elem (into-array [keys]))
+    false))
 
 (defn get-text
   "Returns the text content of a WebElement given
   the WebElement itself or an xpath to the WebElement."
   [element]
-  (let [elem (if (string? element) (get-safe element) element)]
-    (when (not elem)
-      (quit-all)
-      (throw (Exception. (str "\n\nElement: \"" element "\" not found!\n\n"))))
-    (.getText elem)))
+  (if-let [elem (get-safe element)]
+    (.getText elem)
+    false))
 
 (defn wait-for-elements
   "Wait for all elements to be awailable at the
@@ -139,8 +141,8 @@
   [& elements]
   (loop [n 0]
     (when (= n @retries)
-      (quit-all)
-      (throw (Exception. (str "\n\nElements: " (str/join ", " (map #(str "\"" % "\"") elements)) " not found!\n\n"))))
+      (println (str "\n\nElements: " (str/join ", " (map #(str "\"" % "\"") elements)) " not found!\n\n"))
+      false)
     (if (every? identity (map get-element elements))
       true
       (do (sleep 1000)
@@ -159,16 +161,6 @@
   [id]
   (.frame (.switchTo (web)) id))
 
-(defn assert-eq
-  "Throws an Exception if the two first
-  arguments are not equal. In that case
-  the given message will be displayed
-  as part of the Exception message."
-  [observed expected message]
-  (when (not= observed expected)
-    (quit-all)
-    (throw (Exception. (str message "\nObserved: " observed "\nExpected: " expected)))))
-
 (defn testit
   []
   (set-retries 6)
@@ -178,7 +170,7 @@
   (click "js-link-box-en")
   (send-keys "//input[@type='search']" "Turtle\n")
   ;(hover "p-cactions")
-  (assert-eq (get-text "//h1") "Turtle" "Text not found")
+  (is (= (get-text "//h1") "Turtle") "Text not found")
   (wait-for-elements "//h1" "//input[@type='search']")
   (quit)
   ;(sleep 200)
@@ -192,7 +184,7 @@
     (goto "https://www.walmart.com/")
     (send-keys "global-search-input" "iphone 6s\n")
     (click "//img[contains(@alt,'Apple iPhone 6s')]")
-    (assert-eq (get-text "//button[contains(@data-tl-id,'add_to_cart_button')]") "Add to Cart" "Text not found")
+    (is (= (get-text "//button[contains(@data-tl-id,'add_to_cart_button')]") "Add to Cart") "Text not found")
     (println "--DONE--")
     (quit)
     (catch Exception e (quit-all) (println e))))
