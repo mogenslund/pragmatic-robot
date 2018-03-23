@@ -1,25 +1,17 @@
 (ns pbot.framework.web
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
-            [clojure.java.io :as io]))
-(import org.openqa.selenium.chrome.ChromeDriver)
-(import org.openqa.selenium.chrome.ChromeOptions)
-(import org.openqa.selenium.By)
-(import org.openqa.selenium.WebDriver)
-(import org.openqa.selenium.WebElement)
-(import org.openqa.selenium.remote.DesiredCapabilities)
-(import org.openqa.selenium.remote.CapabilityType)
-(import org.openqa.selenium.logging.LoggingPreferences)
-(import org.openqa.selenium.logging.LogType)
-(import org.openqa.selenium.remote.RemoteWebDriver)
-(import org.openqa.selenium.interactions.Actions)
-(import org.openqa.selenium.JavascriptExecutor)
-(import org.openqa.selenium.support.ui.WebDriverWait)
-(import org.openqa.selenium.support.ui.ExpectedConditions)
-(import java.util.concurrent.TimeUnit)
-(import java.util.logging.Level)
-(import java.util.logging.Logger)
-(import java.net.URL)
+            [clojure.java.io :as io])
+  (:import [org.openqa.selenium.chrome ChromeDriver ChromeOptions]
+           [org.openqa.selenium By WebDriver WebElement JavascriptExecutor Dimension]
+           [org.openqa.selenium.remote DesiredCapabilities CapabilityType]
+           [org.openqa.selenium.logging LoggingPreferences LogType]
+           [org.openqa.selenium.remote RemoteWebDriver]
+           [org.openqa.selenium.interactions Actions]
+           [org.openqa.selenium.support.ui WebDriverWait ExpectedConditions]
+           [java.util.concurrent TimeUnit]
+           [java.util.logging Level Logger]
+           [java.net.URL]))
 
 (def myout (java.io.StringWriter.))
 
@@ -27,14 +19,18 @@
 (def retries (atom 30))
 
 (defn next-browser
+  "Use next browser"
   []
   (swap! browsers #(conj (subvec % 1) (first %))))
 
 (defn web
+  "Retrieve the first browser in the list."
   []
   (first @browsers))
 
 (defn set-retries
+  "Set how many times elements should be attempted to be
+  found. Waiting one second between attempts."
   [sec]
   (reset! retries sec))
 
@@ -48,9 +44,11 @@
                                  ; "--headless"
                                  ; "--use-file-for-fake-audio-capture=/tmp/output.wav"
                                  ]))]
-    (swap! browsers conj (ChromeDriver. options))))
+    (swap! browsers conj (ChromeDriver. options)))
+    (-> (web) .manage .window (.setSize (Dimension. 1200 800))))
 
 (defn sleep ; time in milliseconds
+  "Sleep in milliseconds"
   [s]
   (Thread/sleep s))
 
@@ -61,6 +59,7 @@
   (swap! browsers subvec 1))
 
 (defn quit-all
+  "Close all browser instances."
   []
   (while (> (count @browsers) 0)
     (quit)))
@@ -74,6 +73,7 @@
     (.get (web) (str "http://" url))))
 
 (defn get-url
+  "Get the url of the current page."
   [web]
   (.getCurrentUrl web))
 
@@ -135,6 +135,14 @@
     (.getText elem)
     false))
 
+(defn clearfield
+  "Clear the field with the given
+  locator."
+  [element]
+  (if-let [elem (get-safe element)]
+    (.clear elem)
+    false))
+
 (defn wait-for-elements
   "Wait for all elements to be awailable at the
   same time."
@@ -158,6 +166,7 @@
       (.perform))))
 
 (defn switch-iframe
+  "Switch to iframe with the given id."
   [id]
   (.frame (.switchTo (web)) id))
 
