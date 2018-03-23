@@ -1,3 +1,4 @@
 {:deps {org.seleniumhq.selenium/selenium-chrome-driver {:mvn/version "3.9.1"}
-        org.seleniumhq.selenium/selenium-support {:mvn/version "3.9.1"}}
+        org.seleniumhq.selenium/selenium-support {:mvn/version "3.9.1"}
+        clj-http {:mvn/version "3.8.0"}}
  :paths ["src"]}

@@ -1,1 +1,0 @@
-clojure -m pbot.core
