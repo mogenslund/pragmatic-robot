@@ -1,4 +1,4 @@
-(ns pbot.framework.web
+(ns pbot.lib.web
   (:require [clojure.string :as str]
             [clojure.test :refer :all]
             [clojure.java.io :as io])

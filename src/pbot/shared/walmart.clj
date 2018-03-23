@@ -1,5 +1,5 @@
 (ns pbot.shared.walmart
-  (:require [pbot.framework.web :refer :all]))
+  (:require [pbot.lib.web :refer :all]))
 
 (defn walmart-search
   [s]

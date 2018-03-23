@@ -1,7 +1,7 @@
 (ns pbot.tests.samples.sample1
   (:require [clojure.test :refer :all]
             [pbot.shared.walmart :refer :all]
-            [pbot.framework.web :refer :all]))
+            [pbot.lib.web :refer :all]))
 
 (deftest searchtest1
   (set-retries 6)
