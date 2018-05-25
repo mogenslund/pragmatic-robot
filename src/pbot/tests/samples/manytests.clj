@@ -9,7 +9,7 @@
   (new-browser)
   (walmart-search "iphone 6s")
   (click "//img[contains(@alt,'Apple iPhone 6s')]")
-  (is (= (get-text "//button[contains(@data-tl-id,'add_to_cart_button')]") "Add to Cart") "Text not found")
+  (is (= (get-text "//div[contains(@class,'prod-product-cta-add-to-cart')]/button") "Add to Cart") "Text not found")
   (quit))
 
 (deftest many000 (maincontent))
